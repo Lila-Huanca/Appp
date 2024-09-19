@@ -1,80 +1,59 @@
 import streamlit as st
-from PIL import Image
-import numpy as np
-import os
+import openai
+
+# Configuración de la API de OpenAI
+openai.api_key = 's'
+
+# Función para obtener respuestas del chatbot
+def obtener_respuesta(pregunta):
+    respuesta = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": pregunta}]
+    )
+    return respuesta['choices'][0]['message']['content']
+
+# Función para proporcionar recursos específicos
+def proporcionar_recursos(tema):
+    recursos = {
+        "inglés": [
+            "Duolingo: https://www.duolingo.com/",
+            "BBC Learning English: https://www.bbc.co.uk/learningenglish",
+            "Coursera (Inglés): https://www.coursera.org/browse/language-learning/english"
+        ],
+        "matemáticas": [
+            "Khan Academy: https://www.khanacademy.org/math",
+            "Wolfram Alpha: https://www.wolframalpha.com/",
+            "Coursera (Matemáticas): https://www.coursera.org/browse/math-and-logic"
+        ],
+        "programación": [
+            "Codecademy: https://www.codecademy.com/",
+            "freeCodeCamp: https://www.freecodecamp.org/",
+            "Coursera (Programación): https://www.coursera.org/browse/computer-science/mobile-and-web-development"
+        ]
+    }
+    return recursos.get(tema.lower(), ["No tengo recursos específicos para ese tema."])
 
 # Configuración de la interfaz de Streamlit
-st.subheader("Community")
+st.title("Chatbot de Grupo de Estudio")
+st.subheader("Pregunta sobre temas de estudio y obtén recursos útiles.")
 
-# Ruta al modelo preentrenado
-model_path = 'model.h5'
-
-# Función para preprocesar la imagen
-def preprocess_image(image):
-    image = image.resize((256, 256))
-    image = np.array(image)
-    image = image / 255.0
-    image = np.expand_dims(image, axis=0)
-    return image
-
-# Crear menú en la barra lateral
-menu = ["Inicio", "Detección de Retinopatía", "Equipo", "Acerca de"]
-choice = st.sidebar.selectbox("Menú", menu)
-
-if choice == "Inicio":
-    st.subheader("Inicio")
-    st.write("Bienvenido a la aplicación de Community. Utiliza el menú de la barra lateral para navegar entre las secciones.")
-    st.image("retinopatia.jpg")
-elif choice == "Detección de Retinopatía":
-    st.subheader("Detección de Retinopatía Diabética")
-    st.write("Sube una imagen del ojo (JPG o PNG) para detectar si tiene retinopatía diabética.")
-
-    # Verificar si el archivo del modelo existe
-    model_exists = os.path.exists(model_path)
-
-    if model_exists:
-        import tensorflow as tf
-        model = tf.keras.models.load_model(model_path)
-
-    # Configuración de la interfaz de Streamlit
-    st.title("Detección de Retinopatía Diabética")
-    st.write("Sube una imagen del ojo (JPG o PNG) para detectar si tiene retinopatía diabética.")
-
-    uploaded_file = st.file_uploader("Elige una imagen...", type=["jpg", "png"])
-
-    if uploaded_file is not None:
-        # Mostrar la imagen subida
-        image = Image.open(uploaded_file)
-        st.image(image, caption='Imagen subida', use_column_width=True)
-        
-        st.write("")
-        st.write("Procesando la imagen...")
-        
-        # Preprocesar la imagen
-        preprocessed_image = preprocess_image(image)
-        
-        if model_exists:
-            # Realizar la predicción
-            prediction = model.predict(preprocessed_image)
-            score = prediction[0][0]
-            
-            # Mostrar el resultado
-            if score > 0.5:
-                st.write(f"**Resultado:** Retinopatía diabética detectada con una confianza del {score*100:.2f}%.")
-            else:
-                st.write(f"**Resultado:** No se detectó retinopatía diabética con una confianza del {(1-score)*100:.2f}%.")
+# Entrada de usuario
+pregunta = st.text_input("¿Qué necesitas estudiar?")
+if st.button("Enviar"):
+    if pregunta:
+        if "recursos" in pregunta.lower() or "enlace" in pregunta.lower():
+            tema = pregunta.split()[-1]  # Suponemos que el tema es la última palabra
+            recursos = proporcionar_recursos(tema)
+            st.write("Recursos encontrados:")
+            for recurso in recursos:
+                st.write(recurso)
         else:
-            st.write("**Nota:** El modelo no está disponible. No se pudo realizar una detección real.")
-            st.write("Por favor, asegúrate de que el archivo 'model.h5' está en el directorio correcto.")
-    
-elif choice == "Equipo":
-    st.subheader("Equipo")
-    st.sidebar.header("Integrantes del Equipo")
-    st.sidebar.write("Lila Zarai Huanca Ampuero")
-    st.sidebar.write("Yojan Alexander Manosalva Peralta")
-    st.sidebar.write("Michael Richard Gavino Isidro")
-    st.sidebar.write("Sebastian Marcelo Pacheco Vidalon")
-    
-elif choice == "Acerca de":
-    st.subheader("Acerca de")
-    st.write("Esta es una aplicación de detección de retinopatía diabética desarrollada utilizando Streamlit y TensorFlow.")
+            respuesta = obtener_respuesta(pregunta)
+            st.write(respuesta)
+    else:
+        st.write("Por favor, escribe una pregunta.")
+
+st.write("Ejemplos de preguntas:")
+st.write("- ¿Qué necesito estudiar para mejorar mi inglés?")
+st.write("- ¿Tienes recursos para aprender matemáticas?")
+st.write("- Dame enlaces para aprender programación.")
