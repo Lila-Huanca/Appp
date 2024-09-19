@@ -4,7 +4,7 @@ import numpy as np
 import os
 
 # Configuración de la interfaz de Streamlit
-st.subheader("Sistema de Detección de Retinopatía Diabética")
+st.subheader("Community")
 
 # Ruta al modelo preentrenado
 model_path = 'model.h5'
@@ -23,7 +23,7 @@ choice = st.sidebar.selectbox("Menú", menu)
 
 if choice == "Inicio":
     st.subheader("Inicio")
-    st.write("Bienvenido a la aplicación de detección de retinopatía diabética. Utiliza el menú de la barra lateral para navegar entre las secciones.")
+    st.write("Bienvenido a la aplicación de Community. Utiliza el menú de la barra lateral para navegar entre las secciones.")
     st.image("retinopatia.jpg")
 elif choice == "Detección de Retinopatía":
     st.subheader("Detección de Retinopatía Diabética")
