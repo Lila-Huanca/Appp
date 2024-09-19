@@ -2,7 +2,7 @@ import streamlit as st
 import openai
 
 # Configuración de la API de OpenAI
-openai.api_key = 's'
+openai.api_key = 'tu_api_key'
 
 # Función para obtener respuestas del chatbot
 def obtener_respuesta(pregunta):
